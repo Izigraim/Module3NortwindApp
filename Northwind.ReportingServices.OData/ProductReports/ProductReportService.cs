@@ -29,7 +29,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// <returns>Returns <see cref="ProductReport{T}"/>.</returns>
         public async Task<ProductReport<ProductPrice>> GetCurrentProductsReport()
         {
-            var query = (DataServiceQuery<NorthwindProduct>)this.entities.Products;
+            var query = (DataServiceQuery<NorthwindProduct>)this.entities.Products.Where(p => p.ProductName.Contains("z")).OrderByDescending(p => p.ProductName);
 
             var result = await Task<IEnumerable<NorthwindProduct>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
             {
