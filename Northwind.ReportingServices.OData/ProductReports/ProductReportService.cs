@@ -30,28 +30,22 @@ namespace Northwind.ReportingServices.OData.ProductReports
         public async Task<ProductReport<ProductPrice>> GetCurrentProductsReport()
         {
 
-            var query = (DataServiceQuery<NorthwindProduct>)(
-                from p in this.entities.Products
-                where p.ProductName.Contains("z")
-                orderby p.ProductName descending
-                select p);
+            var query = (DataServiceQuery<ProductPrice>)(
+            from p in this.entities.Products
+            where p.ProductName.Contains("z")
+            orderby p.ProductName descending
+            select new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
 
-            var result = await Task<IEnumerable<NorthwindProduct>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
+            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
             {
                 return query.EndExecute(ar);
-            }); 
+            });
 
-            var productPrices = new List<ProductPrice>();
-            foreach (var product in result)
-            {
-                productPrices.Add(new ProductPrice
-                {
-                    Name = product.ProductName,
-                    Price = product.UnitPrice ?? 0,
-                });
-            }
-
-            return new ProductReport<ProductPrice>(productPrices);
+            return new ProductReport<ProductPrice>(result);
         }
 
         /// <summary>
