@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ReportingApp": {
+      "commandName": "Project",
+      "commandLineArgs": "current-products"
+    }
+  }
+}
