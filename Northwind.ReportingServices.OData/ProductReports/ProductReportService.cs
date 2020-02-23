@@ -55,7 +55,21 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// <returns>Returns <see cref="ProductReport{ProductPrice}"/>.</returns>
         public async Task<ProductReport<ProductPrice>> GetMostExpensiveProductsReport(int count)
         {
-            return new ProductReport<ProductPrice>(Array.Empty<ProductPrice>());
+            var query = (DataServiceQuery<ProductPrice>)this.entities.Products.
+            Where(p => p.UnitPrice != null).
+            OrderByDescending(p => p.UnitPrice.Value).
+            Take(count).Select(p => new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
+
+            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
+            {
+                return query.EndExecute(ar);
+            });
+
+            return new ProductReport<ProductPrice>(result);
         }
     }
 }
