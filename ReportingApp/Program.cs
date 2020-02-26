@@ -17,6 +17,7 @@ namespace ReportingApp
         private const string PriceLessThenProducts = "price-less-then-products";
         private const string PriceBetweenProducts = "price-between-products";
         private const string PriceAboveAverageProducts = "price-above-average-products";
+        private const string UnitsInStockDeficit = "units-in-stock-deficit";
 
         /// <summary>
         /// A program entry point.
@@ -72,6 +73,11 @@ namespace ReportingApp
                 await ShowPriceAboveAverageProducts();
                 return;
             }
+            else if (string.Equals(reportName, UnitsInStockDeficit, StringComparison.InvariantCultureIgnoreCase))
+            {
+                await ShowProductsInDeficit();
+                return;
+            }
             else
             {
                 ShowHelp();
@@ -89,6 +95,7 @@ namespace ReportingApp
             Console.WriteLine($"\t{PriceLessThenProducts}\t\tShows current products with a price less than one specified in the parameters.");
             Console.WriteLine($"\t{PriceBetweenProducts}\t\tShows current products with a price less that is between the lower and upper parameter.");
             Console.WriteLine($"\t{PriceAboveAverageProducts}\t\tShows current products with a price above average.");
+            Console.WriteLine($"\t{UnitsInStockDeficit}\t\tShows current products that in dificit.");
         }
 
         private static async Task ShowCurrentProducts()
@@ -124,6 +131,13 @@ namespace ReportingApp
             var service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetPriveAboveAverageProducts();
             PrintProductReport($"products with price above average", report);
+        }
+
+        private static async Task ShowProductsInDeficit()
+        {
+            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            var report = await service.GetProductsInDeficit();
+            PrintProductReport($"products in deficit", report);
         }
 
         private static void PrintProductReport(string header, ProductReport<ProductPrice> productReport)

@@ -139,6 +139,24 @@ namespace Northwind.ReportingServices.OData.ProductReports
             return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Gets a product report with products in deficit.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<ProductReport<ProductPrice>> GetProductsInDeficit()
+        {
+            var query = (DataServiceQuery<ProductPrice>)(
+            from p in this.entities.Products
+            where p.UnitsInStock < p.UnitsOnOrder
+            select new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
+
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
+        }
+
         private async Task<ProductReport<T>> GetAllProductReport<T>(DataServiceQuery<T> query)
         {
             var items = await this.GetAllItems(query).ConfigureAwait(false);
