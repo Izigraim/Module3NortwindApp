@@ -31,6 +31,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
         {
             var query = (DataServiceQuery<ProductPrice>)(
             from p in this.entities.Products
+            where !p.Discontinued
             orderby p.ProductName descending
             select new ProductPrice
             {
@@ -38,12 +39,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
                 Price = p.UnitPrice ?? 0,
             });
 
-            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
-            {
-                return query.EndExecute(ar);
-            });
-
-            return new ProductReport<ProductPrice>(result);
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -62,12 +58,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
                 Price = p.UnitPrice ?? 0,
             });
 
-            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
-            {
-                return query.EndExecute(ar);
-            });
-
-            return new ProductReport<ProductPrice>(result);
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -86,12 +77,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
                 Price = p.UnitPrice ?? 0,
             });
 
-            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
-            {
-                return query.EndExecute(ar);
-            });
-
-            return new ProductReport<ProductPrice>(result);
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -111,12 +97,36 @@ namespace Northwind.ReportingServices.OData.ProductReports
                 Price = p.UnitPrice ?? 0,
             });
 
-            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
+        }
+
+        private async Task<ProductReport<T>> GetAllProductReport<T>(DataServiceQuery<T> query)
+        {
+            var items = await this.GetAllItems(query).ConfigureAwait(false);
+            return new ProductReport<T>(items);
+        }
+
+        private async Task<IEnumerable<T>> GetAllItems<T>(DataServiceQuery<T> query)
+        {
+            var items = new List<T>();
+            var result = await Task<IEnumerable<T>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
             {
                 return query.EndExecute(ar);
-            });
+            }).ConfigureAwait(false) as QueryOperationResponse<T>;
 
-            return new ProductReport<ProductPrice>(result);
+            items.AddRange(result);
+
+            while (result.GetContinuation() != null)
+            {
+                result = await Task<IEnumerable<T>>.Factory.FromAsync(this.entities.BeginExecute(result.GetContinuation(), null, null), (ar) =>
+                {
+                    return this.entities.EndExecute<T>(ar);
+                }).ConfigureAwait(false) as QueryOperationResponse<T>;
+
+                items.AddRange(result);
+            }
+
+            return items;
         }
     }
 }
