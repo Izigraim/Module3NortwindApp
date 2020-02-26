@@ -29,10 +29,8 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// <returns>Returns <see cref="ProductReport{T}"/>.</returns>
         public async Task<ProductReport<ProductPrice>> GetCurrentProductsReport()
         {
-
             var query = (DataServiceQuery<ProductPrice>)(
             from p in this.entities.Products
-            where p.ProductName.Contains("z")
             orderby p.ProductName descending
             select new ProductPrice
             {
@@ -59,6 +57,25 @@ namespace Northwind.ReportingServices.OData.ProductReports
             Where(p => p.UnitPrice != null).
             OrderByDescending(p => p.UnitPrice.Value).
             Take(count).Select(p => new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
+
+            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
+            {
+                return query.EndExecute(ar);
+            });
+
+            return new ProductReport<ProductPrice>(result);
+        }
+
+        public async Task<ProductReport<ProductPrice>> GetPriceLessThenProducts(decimal? price)
+        {
+            var query = (DataServiceQuery<ProductPrice>)(
+            from p in this.entities.Products
+            where p.UnitPrice < price
+            select new ProductPrice
             {
                 Name = p.ProductName,
                 Price = p.UnitPrice ?? 0,

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Data.Services.Client;
 using System.Threading.Tasks;
 using Northwind.ReportingServices.OData.ProductReports;
+using NorthwindModel;
 
 namespace ReportingApp
 {
@@ -12,6 +14,7 @@ namespace ReportingApp
         private const string NorthwindServiceUrl = "https://services.odata.org/V3/Northwind/Northwind.svc";
         private const string CurrentProductsReport = "current-products";
         private const string MostExpensiveProductsReport = "most-expensive-products";
+        private const string PriceLessThenProducts = "price-less-then-products";
 
         /// <summary>
         /// A program entry point.
@@ -41,6 +44,16 @@ namespace ReportingApp
                     return;
                 }
             }
+            else if (string.Equals(reportName, PriceLessThenProducts, StringComparison.InvariantCultureIgnoreCase))
+            {
+                args[1] = args[1].Replace('.', ',');
+
+                if (args.Length > 1 && decimal.TryParse(args[1], out decimal price))
+                {
+                    await ShowPriceLessThenProducts(price);
+                    return;
+                }
+            }
             else
             {
                 ShowHelp();
@@ -55,6 +68,7 @@ namespace ReportingApp
             Console.WriteLine("Reports:");
             Console.WriteLine($"\t{CurrentProductsReport}\t\tShows current products.");
             Console.WriteLine($"\t{MostExpensiveProductsReport}\t\tShows specified number of the most expensive products.");
+            Console.WriteLine($"\t{PriceLessThenProducts}\t\tShows current products with a price less than one specified in the parameters.");
         }
 
         private static async Task ShowCurrentProducts()
@@ -69,6 +83,13 @@ namespace ReportingApp
             var service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetMostExpensiveProductsReport(count);
             PrintProductReport($"{count} most expensive products:", report);
+        }
+
+        private static async Task ShowPriceLessThenProducts(decimal price)
+        {
+            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            var report = await service.GetPriceLessThenProducts(price);
+            PrintProductReport($"products with price less then {price}", report);
         }
 
         private static void PrintProductReport(string header, ProductReport<ProductPrice> productReport)
