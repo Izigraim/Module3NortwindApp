@@ -26,7 +26,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// <summary>
         /// Gets a product report with all current products.
         /// </summary>
-        /// <returns>Returns <see cref="ProductReport{T}"/>.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<ProductReport<ProductPrice>> GetCurrentProductsReport()
         {
             var query = (DataServiceQuery<ProductPrice>)(
@@ -46,7 +46,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// Gets a product report with most expensive products.
         /// </summary>
         /// <param name="count">Items count.</param>
-        /// <returns>Returns <see cref="ProductReport{ProductPrice}"/>.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<ProductReport<ProductPrice>> GetMostExpensiveProductsReport(int count)
         {
             var query = (DataServiceQuery<ProductPrice>)this.entities.Products.
@@ -65,7 +65,7 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// Gets a product report with price less the specified one.
         /// </summary>
         /// <param name="price">Price.</param>
-        /// <returns>Returns <see cref="ProductReport{ProductPrice}"/>.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<ProductReport<ProductPrice>> GetPriceLessThenProducts(decimal? price)
         {
             var query = (DataServiceQuery<ProductPrice>)(
@@ -85,12 +85,51 @@ namespace Northwind.ReportingServices.OData.ProductReports
         /// </summary>
         /// <param name="lower">The lower limit of the price.</param>
         /// <param name="upper">The upper limit of the price.</param>
-        /// <returns>Returns <see cref="ProductReport{ProductPrice}"/>.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<ProductReport<ProductPrice>> GetPriceBetweenProducts(decimal? lower, decimal? upper)
         {
             var query = (DataServiceQuery<ProductPrice>)(
             from p in this.entities.Products
             where p.UnitPrice > lower && p.UnitPrice < upper
+            select new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
+
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets a product report with a price above the average.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<ProductReport<ProductPrice>> GetPriveAboveAverageProducts()
+        {
+            // ??????
+            var query1 = (DataServiceQuery<ProductPrice>)(
+            from p in this.entities.Products
+            select new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
+
+            var items = await this.GetAllItems(query1).ConfigureAwait(false);
+
+            // ???????
+            decimal fullPrice = 0;
+            foreach (var i in items)
+            {
+                fullPrice += i.Price;
+            }
+
+            decimal average = fullPrice / items.Count();
+
+            // ???????
+            var query = (DataServiceQuery<ProductPrice>)(
+            from p in this.entities.Products
+            where p.UnitPrice > average
             select new ProductPrice
             {
                 Name = p.ProductName,

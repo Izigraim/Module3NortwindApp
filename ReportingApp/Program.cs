@@ -16,6 +16,7 @@ namespace ReportingApp
         private const string MostExpensiveProductsReport = "most-expensive-products";
         private const string PriceLessThenProducts = "price-less-then-products";
         private const string PriceBetweenProducts = "price-between-products";
+        private const string PriceAboveAverageProducts = "price-above-average-products";
 
         /// <summary>
         /// A program entry point.
@@ -66,6 +67,11 @@ namespace ReportingApp
                     return;
                 }
             }
+            else if (string.Equals(reportName, PriceAboveAverageProducts, StringComparison.InvariantCultureIgnoreCase))
+            {
+                await ShowPriceAboveAverageProducts();
+                return;
+            }
             else
             {
                 ShowHelp();
@@ -82,6 +88,7 @@ namespace ReportingApp
             Console.WriteLine($"\t{MostExpensiveProductsReport}\t\tShows specified number of the most expensive products.");
             Console.WriteLine($"\t{PriceLessThenProducts}\t\tShows current products with a price less than one specified in the parameters.");
             Console.WriteLine($"\t{PriceBetweenProducts}\t\tShows current products with a price less that is between the lower and upper parameter.");
+            Console.WriteLine($"\t{PriceAboveAverageProducts}\t\tShows current products with a price above average.");
         }
 
         private static async Task ShowCurrentProducts()
@@ -110,6 +117,13 @@ namespace ReportingApp
             var service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetPriceBetweenProducts(lower, upper);
             PrintProductReport($"products with price between {lower} and {upper}", report);
+        }
+
+        private static async Task ShowPriceAboveAverageProducts()
+        {
+            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            var report = await service.GetPriveAboveAverageProducts();
+            PrintProductReport($"products with price above average", report);
         }
 
         private static void PrintProductReport(string header, ProductReport<ProductPrice> productReport)
