@@ -157,6 +157,25 @@ namespace Northwind.ReportingServices.OData.ProductReports
             return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Gets a product report with a specified number of most cheap products.
+        /// </summary>
+        /// <param name="count">Count of products.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<ProductReport<ProductPrice>> GetMostCheapProducts(int count)
+        {
+           var query = (DataServiceQuery<ProductPrice>)this.entities.Products.
+           Where(p => p.UnitPrice != null).
+           OrderBy(p => p.UnitPrice.Value).
+           Take(count).Select(p => new ProductPrice
+           {
+               Name = p.ProductName,
+               Price = p.UnitPrice ?? 0,
+           });
+
+           return await this.GetAllProductReport(query).ConfigureAwait(false);
+        }
+
         private async Task<ProductReport<T>> GetAllProductReport<T>(DataServiceQuery<T> query)
         {
             var items = await this.GetAllItems(query).ConfigureAwait(false);
