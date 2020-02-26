@@ -15,6 +15,7 @@ namespace ReportingApp
         private const string CurrentProductsReport = "current-products";
         private const string MostExpensiveProductsReport = "most-expensive-products";
         private const string PriceLessThenProducts = "price-less-then-products";
+        private const string PriceBetweenProducts = "price-between-products";
 
         /// <summary>
         /// A program entry point.
@@ -54,6 +55,17 @@ namespace ReportingApp
                     return;
                 }
             }
+            else if (string.Equals(reportName, PriceBetweenProducts, StringComparison.InvariantCultureIgnoreCase))
+            {
+                args[1] = args[1].Replace('.', ',');
+                args[2] = args[2].Replace('.', ',');
+
+                if (args.Length > 2 && decimal.TryParse(args[1], out decimal lower) && decimal.TryParse(args[2], out decimal upper))
+                {
+                    await ShowPriceBetweenProducts(lower, upper);
+                    return;
+                }
+            }
             else
             {
                 ShowHelp();
@@ -69,6 +81,7 @@ namespace ReportingApp
             Console.WriteLine($"\t{CurrentProductsReport}\t\tShows current products.");
             Console.WriteLine($"\t{MostExpensiveProductsReport}\t\tShows specified number of the most expensive products.");
             Console.WriteLine($"\t{PriceLessThenProducts}\t\tShows current products with a price less than one specified in the parameters.");
+            Console.WriteLine($"\t{PriceBetweenProducts}\t\tShows current products with a price less that is between the lower and upper parameter.");
         }
 
         private static async Task ShowCurrentProducts()
@@ -90,6 +103,13 @@ namespace ReportingApp
             var service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetPriceLessThenProducts(price);
             PrintProductReport($"products with price less then {price}", report);
+        }
+
+        private static async Task ShowPriceBetweenProducts(decimal lower, decimal upper)
+        {
+            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            var report = await service.GetPriceBetweenProducts(lower, upper);
+            PrintProductReport($"products with price between {lower} and {upper}", report);
         }
 
         private static void PrintProductReport(string header, ProductReport<ProductPrice> productReport)

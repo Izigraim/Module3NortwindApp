@@ -70,11 +70,41 @@ namespace Northwind.ReportingServices.OData.ProductReports
             return new ProductReport<ProductPrice>(result);
         }
 
+        /// <summary>
+        /// Gets a product report with price less the specified one.
+        /// </summary>
+        /// <param name="price">Price.</param>
+        /// <returns>Returns <see cref="ProductReport{ProductPrice}"/>.</returns>
         public async Task<ProductReport<ProductPrice>> GetPriceLessThenProducts(decimal? price)
         {
             var query = (DataServiceQuery<ProductPrice>)(
             from p in this.entities.Products
             where p.UnitPrice < price
+            select new ProductPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+            });
+
+            var result = await Task<IEnumerable<ProductPrice>>.Factory.FromAsync(query.BeginExecute(null, null), (ar) =>
+            {
+                return query.EndExecute(ar);
+            });
+
+            return new ProductReport<ProductPrice>(result);
+        }
+
+        /// <summary>
+        /// Gets a product report with a price that is between the lower and upper parameters.
+        /// </summary>
+        /// <param name="lower">The lower limit of the price.</param>
+        /// <param name="upper">The upper limit of the price.</param>
+        /// <returns>Returns <see cref="ProductReport{ProductPrice}"/>.</returns>
+        public async Task<ProductReport<ProductPrice>> GetPriceBetweenProducts(decimal? lower, decimal? upper)
+        {
+            var query = (DataServiceQuery<ProductPrice>)(
+            from p in this.entities.Products
+            where p.UnitPrice > lower && p.UnitPrice < upper
             select new ProductPrice
             {
                 Name = p.ProductName,

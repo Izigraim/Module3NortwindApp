@@ -2,7 +2,7 @@
   "profiles": {
     "ReportingApp": {
       "commandName": "Project",
-      "commandLineArgs": "price-less-then-products 20.00"
+      "commandLineArgs": "price-between-products 10.00 20.00"
     }
   }
 }
