@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace Northwind.CurrencyServices
+﻿namespace Northwind.CurrencyServices
 {
+    using System;
+
     public class Class1
     {
     }

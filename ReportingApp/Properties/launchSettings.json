@@ -2,7 +2,7 @@
   "profiles": {
     "ReportingApp": {
       "commandName": "Project",
-      "commandLineArgs": "most-cheap-products 5"
+      "commandLineArgs": "currency"
     }
   }
 }

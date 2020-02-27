@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Data.Services.Client;
 using System.Threading.Tasks;
+using Northwind.CurrencyServices;
+using Northwind.CurrencyServices.CountryCurrency;
+using Northwind.CurrencyServices.CurrencyExchange;
 using Northwind.ReportingServices.OData.ProductReports;
 using NorthwindModel;
 
@@ -89,6 +92,10 @@ namespace ReportingApp
             }
             else
             {
+                var service = new CurrencyExchangeService("829c9b89f0e3e61d66d7df47f0d84783");
+                await service.GetCurrencyExchangeRate("BYN", "USD");
+                //var service = new CountryCurrencyService();
+                //await service.GetLocalCurrencyByCountry("1");
                 ShowHelp();
             }
         }
