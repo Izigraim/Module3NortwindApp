@@ -29,4 +29,8 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Northwind.CurrencyServices\Northwind.CurrencyServices.csproj" />
+  </ItemGroup>
+
 </Project>
