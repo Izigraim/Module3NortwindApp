@@ -22,6 +22,7 @@ namespace ReportingApp
         private const string PriceAboveAverageProducts = "price-above-average-products";
         private const string UnitsInStockDeficit = "units-in-stock-deficit";
         private const string MostCheapProducts = "most-cheap-products";
+        private const string CurrentProductsLocalPrices = "current-products-local-prices";
 
         /// <summary>
         /// A program entry point.
@@ -90,12 +91,13 @@ namespace ReportingApp
                     return;
                 }
             }
+            else if (string.Equals(reportName, CurrentProductsLocalPrices, StringComparison.InvariantCultureIgnoreCase))
+            {
+                await CurrentLocalPrices();
+                return;
+            }
             else
             {
-                var service = new CurrencyExchangeService("829c9b89f0e3e61d66d7df47f0d84783");
-                await service.GetCurrencyExchangeRate("BYN", "USD");
-                //var service = new CountryCurrencyService();
-                //await service.GetLocalCurrencyByCountry("1");
                 ShowHelp();
             }
         }
@@ -113,6 +115,7 @@ namespace ReportingApp
             Console.WriteLine($"\t{PriceAboveAverageProducts}\t\tShows current products with a price above average.");
             Console.WriteLine($"\t{UnitsInStockDeficit}\t\tShows current products that in dificit.");
             Console.WriteLine($"\t{MostCheapProducts}\t\tShows specified number of the most cheap products.");
+            Console.WriteLine($"\t{CurrentProductsLocalPrices}\t\tShows current products with local proce.");
         }
 
         private static async Task ShowCurrentProducts()
@@ -164,12 +167,28 @@ namespace ReportingApp
             PrintProductReport($"{count} most cheap products:", report);
         }
 
+        private static async Task CurrentLocalPrices()
+        {
+            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            var report = await service.GetCurrentProductsWithLocalCurrencyReport();
+            PrintProductLocalPriceReport($"curent products with local price:", report);
+        }
+
         private static void PrintProductReport(string header, ProductReport<ProductPrice> productReport)
         {
             Console.WriteLine($"Report - {header}");
             foreach (var reportLine in productReport.Products)
             {
                 Console.WriteLine("{0}, {1}", reportLine.Name, reportLine.Price);
+            }
+        }
+
+        private static void PrintProductLocalPriceReport(string header, ProductReport<ProductLocalPrice> productReport)
+        {
+            Console.WriteLine($"Report - {header}");
+            foreach (var reportLine in productReport.Products)
+            {
+                Console.WriteLine("{0}, {1:F2}$, {2}, {3:F2}{4}", reportLine.Name, reportLine.Price, reportLine.Country, reportLine.LocalPrice, reportLine.CurrencySymbol);
             }
         }
     }

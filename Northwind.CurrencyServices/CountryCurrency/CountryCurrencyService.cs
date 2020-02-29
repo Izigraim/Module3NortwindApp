@@ -16,11 +16,22 @@
 
         public async Task<LocalCurrency> GetLocalCurrencyByCountry(string countryName)
         {
-            var msg = Client.GetStringAsync($"https://restcountries.eu/rest/v2/name/belarus");
+            var msg = Client.GetStringAsync($"https://restcountries.eu/rest/v2/name/{countryName}");
             var msg1 = await msg;
-            Console.WriteLine(msg1);
 
-            return null;
+            LocalCurrency localCurrency = new LocalCurrency();
+
+            using (JsonDocument jsonDocument = JsonDocument.Parse(msg1))
+            {
+                JsonElement root = jsonDocument.RootElement[0];
+                JsonElement quotes = root.GetProperty("name");
+
+                localCurrency.CountryName = quotes.GetString();
+                localCurrency.CurrencyCode = root.GetProperty("currencies")[0].GetProperty("code").GetString();
+                localCurrency.CurrencySymbol = root.GetProperty("currencies")[0].GetProperty("symbol").GetString();
+            }
+
+            return localCurrency;
         }
     }
 }

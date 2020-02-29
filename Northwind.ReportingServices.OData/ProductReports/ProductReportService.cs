@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Northwind.CurrencyServices.CountryCurrency;
+using Northwind.CurrencyServices.CurrencyExchange;
 using NorthwindProduct = NorthwindModel.Product;
 
 namespace Northwind.ReportingServices.OData.ProductReports
@@ -174,6 +177,26 @@ namespace Northwind.ReportingServices.OData.ProductReports
            });
 
            return await this.GetAllProductReport(query).ConfigureAwait(false);
+        }
+
+        public async Task<ProductReport<ProductLocalPrice>> GetCurrentProductsWithLocalCurrencyReport()
+        {
+            var countryCurrencyService = new CountryCurrencyService();
+            var currencyExchangeService = new CurrencyExchangeService("fa9a004955de23508c4e7e6e2288375f");
+
+            var query = (DataServiceQuery<ProductLocalPrice>)(
+            from p in this.entities.Products
+            where !p.Discontinued
+            select new ProductLocalPrice
+            {
+                Name = p.ProductName,
+                Price = p.UnitPrice ?? 0,
+                Country = p.Supplier.Country,
+                LocalPrice = currencyExchangeService.GetCurrencyExchangeRate("USD", countryCurrencyService.GetLocalCurrencyByCountry(p.Supplier.Country).Result.CurrencyCode).Result * (p.UnitPrice ?? 0),
+                CurrencySymbol = countryCurrencyService.GetLocalCurrencyByCountry(p.Supplier.Country).Result.CurrencySymbol,
+            }) ;
+
+            return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
         private async Task<ProductReport<T>> GetAllProductReport<T>(DataServiceQuery<T> query)

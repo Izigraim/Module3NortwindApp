@@ -26,7 +26,6 @@
             {
                 var msg = Client.GetStringAsync($"http://api.currencylayer.com/live?access_key={this.accessKey}&currencies={exchangeCurrency}");
                 var msg1 = await msg;
-
                 decimal rate = 0;
 
                 using (JsonDocument jsonDocument = JsonDocument.Parse(msg1))

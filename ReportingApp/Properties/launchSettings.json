@@ -2,7 +2,7 @@
   "profiles": {
     "ReportingApp": {
       "commandName": "Project",
-      "commandLineArgs": "currency"
+      "commandLineArgs": "current-products-local-prices"
     }
   }
 }
