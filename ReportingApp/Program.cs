@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using Northwind.CurrencyServices;
 using Northwind.CurrencyServices.CountryCurrency;
 using Northwind.CurrencyServices.CurrencyExchange;
+using Northwind.ReportingServices;
 using Northwind.ReportingServices.OData.ProductReports;
+using Northwind.ReportingServices.ProductReports;
 using NorthwindModel;
 
 namespace ReportingApp
@@ -120,62 +122,63 @@ namespace ReportingApp
 
         private static async Task ShowCurrentProducts()
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetCurrentProductsReport();
             PrintProductReport("current products:", report);
         }
 
         private static async Task ShowMostExpensiveProducts(int count)
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetMostExpensiveProductsReport(count);
             PrintProductReport($"{count} most expensive products:", report);
         }
 
         private static async Task ShowPriceLessThenProducts(decimal price)
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetPriceLessThenProducts(price);
             PrintProductReport($"products with price less then {price}", report);
         }
 
         private static async Task ShowPriceBetweenProducts(decimal lower, decimal upper)
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetPriceBetweenProducts(lower, upper);
             PrintProductReport($"products with price between {lower} and {upper}", report);
         }
 
         private static async Task ShowPriceAboveAverageProducts()
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetPriveAboveAverageProducts();
             PrintProductReport($"products with price above average", report);
         }
 
         private static async Task ShowProductsInDeficit()
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetProductsInDeficit();
             PrintProductReport($"products in deficit", report);
         }
 
         private static async Task ShowMostCheapProducts(int count)
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
             var report = await service.GetMostCheapProducts(count);
             PrintProductReport($"{count} most cheap products:", report);
         }
 
         private static async Task CurrentLocalPrices()
         {
-            var service = new ProductReportService(new Uri(NorthwindServiceUrl));
+            IProductReportService service = new ProductReportService(new Uri(NorthwindServiceUrl));
 
             ICountryCurrencyService countryCurrencyService = new CountryCurrencyService();
-            ICurrencyExchangeService currencyExchangeService = new CurrencyExchangeService("fa9a004955de23508c4e7e6e2288375f");
+            ICurrencyExchangeService currencyExchangeService = new CurrencyExchangeService("5a383f8e25731418bc925cfc6d814087");
 
-            var report = await service.GetCurrentProductsWithLocalCurrencyReport(countryCurrencyService, currencyExchangeService);
-            PrintProductLocalPriceReport($"curent products with local price:", report);
+            CurrentProductLocalPriceReport currentProductLocalPriceReport = new CurrentProductLocalPriceReport(service, currencyExchangeService, countryCurrencyService);
+
+            await currentProductLocalPriceReport.PrintReport();
         }
 
         private static void PrintProductReport(string header, ProductReport<ProductPrice> productReport)
@@ -184,15 +187,6 @@ namespace ReportingApp
             foreach (var reportLine in productReport.Products)
             {
                 Console.WriteLine("{0}, {1}", reportLine.Name, reportLine.Price);
-            }
-        }
-
-        private static void PrintProductLocalPriceReport(string header, ProductReport<ProductLocalPrice> productReport)
-        {
-            Console.WriteLine($"Report - {header}");
-            foreach (var reportLine in productReport.Products)
-            {
-                Console.WriteLine("{0}, {1:F2}$, {2}, {3:F2}{4}", reportLine.Name, reportLine.Price, reportLine.Country, reportLine.LocalPrice, reportLine.CurrencySymbol);
             }
         }
     }
