@@ -170,7 +170,11 @@ namespace ReportingApp
         private static async Task CurrentLocalPrices()
         {
             var service = new ProductReportService(new Uri(NorthwindServiceUrl));
-            var report = await service.GetCurrentProductsWithLocalCurrencyReport();
+
+            ICountryCurrencyService countryCurrencyService = new CountryCurrencyService();
+            ICurrencyExchangeService currencyExchangeService = new CurrencyExchangeService("fa9a004955de23508c4e7e6e2288375f");
+
+            var report = await service.GetCurrentProductsWithLocalCurrencyReport(countryCurrencyService, currencyExchangeService);
             PrintProductLocalPriceReport($"curent products with local price:", report);
         }
 

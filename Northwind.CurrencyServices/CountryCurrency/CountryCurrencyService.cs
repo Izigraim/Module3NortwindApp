@@ -10,7 +10,7 @@
     using System.Text.Json;
     using System.Threading.Tasks;
 
-    public class CountryCurrencyService
+    public class CountryCurrencyService : ICountryCurrencyService
     {
         private static readonly HttpClient Client = new HttpClient();
 

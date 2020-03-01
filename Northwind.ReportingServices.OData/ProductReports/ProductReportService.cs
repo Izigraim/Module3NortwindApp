@@ -179,11 +179,8 @@ namespace Northwind.ReportingServices.OData.ProductReports
            return await this.GetAllProductReport(query).ConfigureAwait(false);
         }
 
-        public async Task<ProductReport<ProductLocalPrice>> GetCurrentProductsWithLocalCurrencyReport()
+        public async Task<ProductReport<ProductLocalPrice>> GetCurrentProductsWithLocalCurrencyReport(ICountryCurrencyService countryCurrencyService, ICurrencyExchangeService currencyExchangeService)
         {
-            var countryCurrencyService = new CountryCurrencyService();
-            var currencyExchangeService = new CurrencyExchangeService("fa9a004955de23508c4e7e6e2288375f");
-
             var query = (DataServiceQuery<ProductLocalPrice>)(
             from p in this.entities.Products
             where !p.Discontinued

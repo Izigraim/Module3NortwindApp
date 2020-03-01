@@ -10,7 +10,7 @@
     using System.Text.Json;
     using System.Threading.Tasks;
 
-    public class CurrencyExchangeService
+    public class CurrencyExchangeService : ICurrencyExchangeService
     {
         private static readonly HttpClient Client = new HttpClient();
         private readonly string accessKey;
